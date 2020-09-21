@@ -30,8 +30,8 @@ class Keras2Graph(Graph):
     def __init__(self, model):
         # sanity check.
         print(model.summary())
-        if not (type(model) == _keras.models.Sequential or type(model) == _keras.models.Model):
-            raise TypeError("Keras layer of type %s is not supported." % type(model))
+        # if not (type(model) == _keras.models.Sequential or type(model) == _keras.models.Model):
+        #     raise TypeError("Keras layer of type %s is not supported." % type(model))
         super(Keras2Graph, self).__init__(model)
         self.model = model
 
