@@ -118,7 +118,7 @@ class Keras2Parser(Parser):
                     'relu6': layers.ReLU(6, name='relu6'),
                     'DepthwiseConv2D': layers.DepthwiseConv2D,
                     'AudioVarianceScaling': VarianceScaling,
-                    'F1Metric': F1Score
+                    'F1Score': F1Score
                 }
             )
             self.weight_loaded = True
