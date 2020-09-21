@@ -41,9 +41,7 @@ class Keras2Graph(Graph):
             self.layer_map[layer.name] = Keras2GraphNode(layer)
             self.layer_name_map[layer.name] = layer.name
             for node in layer._inbound_nodes:
-                print(node)
-                print(node.inbound_layers)
-                for pred in node.inbound_layers:
+                for pred in node:
                     if pred.name not in self.layer_map:
                         self.layer_map[pred.name] = Keras2GraphNode(pred)
                         self.layer_name_map[pred.name] = pred.name
