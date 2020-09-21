@@ -3,7 +3,7 @@
 #  Licensed under the MIT License. See License.txt in the project root for license information.
 # ----------------------------------------------------------------------------------------------
 import os
-import keras as _keras
+import tensorflow.keras as _keras
 from mmdnn.conversion.common.DataStructure.graph import GraphNode, Graph
 
 
@@ -41,6 +41,8 @@ class Keras2Graph(Graph):
             self.layer_map[layer.name] = Keras2GraphNode(layer)
             self.layer_name_map[layer.name] = layer.name
             for node in layer._inbound_nodes:
+                print(node)
+                print(node.inbound_layers)
                 for pred in node.inbound_layers:
                     if pred.name not in self.layer_map:
                         self.layer_map[pred.name] = Keras2GraphNode(pred)
