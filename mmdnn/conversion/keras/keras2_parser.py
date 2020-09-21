@@ -1,7 +1,7 @@
-#----------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------
 #  Copyright (c) Microsoft Corporation. All rights reserved.
 #  Licensed under the MIT License. See License.txt in the project root for license information.
-#----------------------------------------------------------------------------------------------
+# ----------------------------------------------------------------------------------------------
 
 import os
 from six import string_types as _string_types
@@ -16,30 +16,28 @@ from mmdnn.conversion.common.utils import *
 
 
 class Keras2Parser(Parser):
-
     dtype_map = {
-        "float16" : graph_pb2.DT_FLOAT16,
-        "float32" : graph_pb2.DT_FLOAT32,
-        "float64" : graph_pb2.DT_FLOAT64,
-        "int16"   : graph_pb2.DT_INT16,
-        "int32"   : graph_pb2.DT_INT32,
-        "int64"   : graph_pb2.DT_INT64,
-        "uint8"   : graph_pb2.DT_UINT8,
-        "uint16"  : graph_pb2.DT_UINT16
+        "float16": graph_pb2.DT_FLOAT16,
+        "float32": graph_pb2.DT_FLOAT32,
+        "float64": graph_pb2.DT_FLOAT64,
+        "int16": graph_pb2.DT_INT16,
+        "int32": graph_pb2.DT_INT32,
+        "int64": graph_pb2.DT_INT64,
+        "uint8": graph_pb2.DT_UINT8,
+        "uint16": graph_pb2.DT_UINT16
     }
 
     activation_map = {
-        "relu"          : "Relu",
-        'softmax'       : "Softmax",
-        'sigmoid'       : "Sigmoid",
-        "tanh"          : "Tanh",
-        "elu"           : "Elu",
-        "relu6"         : "Relu6",
-        'softplus'      : 'Softplus',
-        'softsign'      : 'Softsign',
-        'hard_sigmoid'  : 'HardSigmoid'
+        "relu": "Relu",
+        'softmax': "Softmax",
+        'sigmoid': "Sigmoid",
+        "tanh": "Tanh",
+        "elu": "Elu",
+        "relu6": "Relu6",
+        'softplus': 'Softplus',
+        'softsign': 'Softsign',
+        'hard_sigmoid': 'HardSigmoid'
     }
-
 
     def _load_model(self, model_network_path, model_weight_path):
         """Load a keras model from disk
@@ -65,24 +63,24 @@ class Keras2Parser(Parser):
 
         # Load the model weights
 
-        try:
-            from keras.applications.mobilenet import relu6
-            from keras.applications.mobilenet import DepthwiseConv2D
-            loaded_model = model_from_json(loaded_model_json, custom_objects={
-                'relu6': _keras.applications.mobilenet.relu6,
-                'DepthwiseConv2D': _keras.applications.mobilenet.DepthwiseConv2D})
-        except:
-            import keras.layers as layers
-            loaded_model = model_from_json(loaded_model_json, custom_objects={
-                'relu6': layers.ReLU(6, name='relu6'),
-                'DepthwiseConv2D': layers.DepthwiseConv2D})
-
+        # try:
+        #     from keras.applications.mobilenet import relu6
+        #     from keras.applications.mobilenet import DepthwiseConv2D
+        #     loaded_model = model_from_json(loaded_model_json, custom_objects={
+        #         'relu6': _keras.applications.mobilenet.relu6,
+        #         'DepthwiseConv2D': _keras.applications.mobilenet.DepthwiseConv2D})
+        # except:
+        import keras.layers as layers
+        loaded_model = model_from_json(loaded_model_json, custom_objects={
+            'relu6': layers.ReLU(6, name='relu6'),
+            'DepthwiseConv2D': layers.DepthwiseConv2D})
 
         if model_weight_path:
             if os.path.isfile(model_weight_path):
                 loaded_model.load_weights(model_weight_path)
                 self.weight_loaded = True
-                print("Network file [{}] and [{}] is loaded successfully.".format(model_network_path, model_weight_path))
+                print(
+                    "Network file [{}] and [{}] is loaded successfully.".format(model_network_path, model_weight_path))
 
             else:
                 print("Warning: Weights File [%s] is not found." % (model_weight_path))
@@ -93,33 +91,32 @@ class Keras2Parser(Parser):
     def src_graph(self):
         return self.keras_graph
 
-
     def __init__(self, model):
         super(Keras2Parser, self).__init__()
 
         # load model files into Keras graph
         if isinstance(model, _string_types):
-            try:
-                # Keras 2.1.6
-                from keras.applications.mobilenet import relu6
-                from keras.applications.mobilenet import DepthwiseConv2D
-                model = _keras.models.load_model(
-                    model,
-                    custom_objects={
-                        'relu6': _keras.applications.mobilenet.relu6,
-                        'DepthwiseConv2D': _keras.applications.mobilenet.DepthwiseConv2D
-                    }
-                )
-            except:
-                # Keras. 2.2.2
-                import keras.layers as layers
-                model = _keras.models.load_model(
-                    model,
-                    custom_objects={
-                        'relu6': layers.ReLU(6, name='relu6'),
-                        'DepthwiseConv2D': layers.DepthwiseConv2D
-                    }
-                )
+            # try:
+            #     # Keras 2.1.6
+            #     from keras.applications.mobilenet import relu6
+            #     from keras.applications.mobilenet import DepthwiseConv2D
+            #     model = _keras.models.load_model(
+            #         model,
+            #         custom_objects={
+            #             'relu6': _keras.applications.mobilenet.relu6,
+            #             'DepthwiseConv2D': _keras.applications.mobilenet.DepthwiseConv2D
+            #         }
+            #     )
+            # except:
+            # Keras. 2.2.2
+            import keras.layers as layers
+            model = _keras.models.load_model(
+                model,
+                custom_objects={
+                    'relu6': layers.ReLU(6, name='relu6'),
+                    'DepthwiseConv2D': layers.DepthwiseConv2D
+                }
+            )
             self.weight_loaded = True
 
         elif isinstance(model, tuple):
@@ -136,12 +133,11 @@ class Keras2Parser(Parser):
         self.keras_graph.build()
         self.lambda_layer_count = 0
 
-
     def gen_IR(self):
         for layer in self.keras_graph.topological_sort:
             current_node = self.keras_graph.get_node(layer)
             node_type = current_node.type
-  
+
             if hasattr(self, "rename_" + node_type):
                 func = getattr(self, "rename_" + node_type)
                 func(current_node)
@@ -150,7 +146,6 @@ class Keras2Parser(Parser):
                 self.rename_UNKNOWN(current_node)
 
         _K.clear_session()
-
 
     @staticmethod
     def _set_output_shape(source_node, IR_node):
@@ -161,9 +156,8 @@ class Keras2Parser(Parser):
 
         IR_node.attr["_output_shapes"].list.shape.extend([shape])
 
-
     @staticmethod
-    def _copy_and_reop(source_node, IR_node, new_op = None):
+    def _copy_and_reop(source_node, IR_node, new_op=None):
         IR_node.name = source_node.name
         IR_node.op = source_node.type if new_op == None else new_op
 
@@ -171,7 +165,6 @@ class Keras2Parser(Parser):
             IR_node.attr["dtype"].type = Keras2Parser.dtype_map[source_node.layer.dtype]
 
         Keras2Parser._set_output_shape(source_node, IR_node)
-
 
     @staticmethod
     def _copy_shape(source_node, target_node):
@@ -183,7 +176,6 @@ class Keras2Parser(Parser):
         else:
             target_node.attr["shape"].shape.unknown_rank = True
 
-
     @staticmethod
     def _convert_dataformat(source_node, target_node):
         if source_node.keras_layer.data_format == 'channels_last':
@@ -193,25 +185,24 @@ class Keras2Parser(Parser):
         else:
             print("Warning: [%s] don't have data format info." % (source_node.keras_layer.name))
 
-
     @staticmethod
     def _convert_padding(source_node, IR_node):
         # TODO: Fused conv and pool with padding is different from defused operators
         dims = len(source_node.layer.input_shape)
         if source_node.layer.padding == 'valid':
-            assign_IRnode_values(IR_node, {'auto_pad' : "VALID", 'pads' : [0, 0] * dims})
+            assign_IRnode_values(IR_node, {'auto_pad': "VALID", 'pads': [0, 0] * dims})
 
         elif source_node.layer.padding == 'same':
-            kernel_shape = source_node.layer.kernel_size if hasattr(source_node.layer, 'kernel_size') else source_node.layer.pool_size
+            kernel_shape = source_node.layer.kernel_size if hasattr(source_node.layer,
+                                                                    'kernel_size') else source_node.layer.pool_size
             padding = compute_tf_same_padding(
                 source_node.layer.input_shape,
                 kernel_shape,
                 list(source_node.layer.strides))
-            assign_IRnode_values(IR_node, {'auto_pad' : "SAME_LOWER", 'pads' : padding})
+            assign_IRnode_values(IR_node, {'auto_pad': "SAME_LOWER", 'pads': padding})
 
         else:
             assert False
-
 
     def _defuse_activation(self, source_node):
         if source_node.layer.activation is None or source_node.layer.activation.__name__ == "linear":
@@ -229,7 +220,6 @@ class Keras2Parser(Parser):
             assign_attr_value(IR_node['alpha'], source_node.layer.alpha)
 
         source_node.real_name = IR_node.name
-
 
     def _convert_convolution(self, source_node, dim):
         IR_node = self.IR_graph.node.add()
@@ -281,7 +271,8 @@ class Keras2Parser(Parser):
 
         # filter
         # [kd, kh, kw, channel_size, filter number]
-        in_channel = source_node.layer.input_shape[-1] if self.data_format == "channels_last" else source_node.layer.input_shape[1]
+        in_channel = source_node.layer.input_shape[-1] if self.data_format == "channels_last" else \
+        source_node.layer.input_shape[1]
         out_channel = source_node.layer.filters or source_node.layer.depth_multiplier
 
         if source_node.type.startswith("Deconv"):
@@ -305,7 +296,6 @@ class Keras2Parser(Parser):
         # activation
         self._defuse_activation(source_node)
 
-
     def _convert_pooling(self, source_node, dim, pooling_type, is_global):
         IR_node = self.IR_graph.node.add()
 
@@ -318,7 +308,6 @@ class Keras2Parser(Parser):
         kwargs = {}
 
         kwargs['pooling_type'] = pooling_type
-
 
         if is_global:
             kwargs['global_pooling'] = True
@@ -351,8 +340,7 @@ class Keras2Parser(Parser):
             Keras2Parser._set_output_shape(source_node, flatten_node)
             source_node.real_name = flatten_node.name
 
-
-    def _convert_merge(self, source_node, new_name = None):
+    def _convert_merge(self, source_node, new_name=None):
         IR_node = self.IR_graph.node.add()
 
         # name, op
@@ -370,9 +358,8 @@ class Keras2Parser(Parser):
 
         return IR_node
 
-
     def _convert_padding_api(self, source_node, IR_node, mode):
-         # name, op
+        # name, op
         Keras2Parser._copy_and_reop(source_node, IR_node, "Pad")
 
         # input edge
@@ -389,9 +376,8 @@ class Keras2Parser(Parser):
         kwargs['pads'] = convert_tf_pad_to_onnx(kwargs['pads'])
         assign_IRnode_values(IR_node, kwargs)
 
-
     def rename_UNKNOWN(self, source_node):
-        print (source_node.layer.get_config())
+        print(source_node.layer.get_config())
 
         # only for training
         IR_node = self.IR_graph.node.add()
@@ -402,23 +388,22 @@ class Keras2Parser(Parser):
         # input edge
         self.convert_inedge(source_node, IR_node)
 
-
     def rename_Activation(self, keras_node):
         IR_node = self.IR_graph.node.add()
         # name, op
         try:
-            Keras2Parser._copy_and_reop(keras_node, IR_node, self.activation_map[keras_node.keras_layer.activation.__name__])
+            Keras2Parser._copy_and_reop(keras_node, IR_node,
+                                        self.activation_map[keras_node.keras_layer.activation.__name__])
         except:
-            Keras2Parser._copy_and_reop(keras_node, IR_node, self.activation_map[keras_node.keras_layer.activation.name])
+            Keras2Parser._copy_and_reop(keras_node, IR_node,
+                                        self.activation_map[keras_node.keras_layer.activation.name])
 
         # input edge
         self.convert_inedge(keras_node, IR_node)
 
-
     # Merge Layers
     def rename_Add(self, source_node):
         self._convert_merge(source_node)
-
 
     def rename_Conv1D(self, source_node):
         self._convert_convolution(source_node, 1)
@@ -451,55 +436,41 @@ class Keras2Parser(Parser):
         # shape
         Keras2Parser._copy_shape(source_node.keras_layer, IR_node)
 
-
-
     def rename_GlobalMaxPooling1D(self, source_node):
         self._convert_pooling(source_node, 1, "MAX", True)
-
 
     def rename_GlobalMaxPooling2D(self, source_node):
         self._convert_pooling(source_node, 2, "MAX", True)
 
-
     def rename_GlobalMaxPooling3D(self, source_node):
         self._convert_pooling(source_node, 3, "MAX", True)
-
 
     def rename_GlobalAveragePooling1D(self, source_node):
         self._convert_pooling(source_node, 1, "AVG", True)
 
-
     def rename_GlobalAveragePooling2D(self, source_node):
         self._convert_pooling(source_node, 2, "AVG", True)
-
 
     def rename_GlobalAveragePooling3D(self, source_node):
         self._convert_pooling(source_node, 3, "AVG", True)
 
-
     def rename_MaxPooling1D(self, source_node):
         self._convert_pooling(source_node, 1, "MAX", False)
-
 
     def rename_MaxPooling2D(self, source_node):
         self._convert_pooling(source_node, 2, "MAX", False)
 
-
     def rename_MaxPooling3D(self, source_node):
         self._convert_pooling(source_node, 3, "MAX", False)
-
 
     def rename_AveragePooling1D(self, source_node):
         self._convert_pooling(source_node, 1, "AVG", False)
 
-
     def rename_AveragePooling2D(self, source_node):
         self._convert_pooling(source_node, 2, "AVG", False)
 
-
     def rename_AveragePooling3D(self, source_node):
         self._convert_pooling(source_node, 3, "AVG", False)
-
 
     def rename_Dropout(self, source_node):
         # only for training
@@ -514,7 +485,6 @@ class Keras2Parser(Parser):
         IR_node.attr["keep_prob"].f = source_node.keras_layer.rate
         if source_node.keras_layer.seed != None:
             IR_node.attr["seed"].i = source_node.keras_layer.seed
-
 
     # Core Layers
     def rename_Dense(self, source_node):
@@ -541,7 +511,6 @@ class Keras2Parser(Parser):
         # activation
         self._defuse_activation(source_node)
 
-
     def rename_Flatten(self, source_node):
         IR_node = self.IR_graph.node.add()
 
@@ -562,7 +531,6 @@ class Keras2Parser(Parser):
 
         # size
         IR_node.attr["scales"].list.i.extend(source_node.keras_layer.size)
-
 
     def rename_Embedding(self, source_node):
         IR_node = self.IR_graph.node.add()
@@ -586,7 +554,6 @@ class Keras2Parser(Parser):
         if self.weight_loaded:
             self.set_weight(source_node.name, 'embedding_weights', source_node.layer.get_weights()[0])
 
-
     def rename_LSTM(self, keras_node):
         IR_node = self.IR_graph.node.add()
 
@@ -608,7 +575,6 @@ class Keras2Parser(Parser):
 
         # activation
         self._defuse_activation(keras_node)
-
 
     def rename_GRU(self, source_node):
         IR_node = self.IR_graph.node.add()
@@ -632,23 +598,18 @@ class Keras2Parser(Parser):
             if source_node.layer.use_bias:
                 self.set_weight(source_node.name, "gru_bias", source_node.layer.get_weights()[2])
 
-
     def rename_Multiply(self, source_node):
         self._convert_merge(source_node, 'Mul')
-
 
     def rename_Average(self, source_node):
         # Kit TODO : need to search the tf
         self._convert_merge(source_node, 'Avg')
 
-
     def rename_Maximum(self, source_node):
         self._convert_merge(source_node)
 
-
     def rename_Concatenate(self, source_node):
         IR_node = self._convert_merge(source_node, 'Concat')
-
 
     def rename_Reshape(self, source_node):
         IR_node = self.IR_graph.node.add()
@@ -663,16 +624,14 @@ class Keras2Parser(Parser):
         IR_node.attr["shape"].list.i.append(-1)
         IR_node.attr["shape"].list.i.extend(source_node.layer.target_shape)
 
-
     def rename_Lambda(self, source_node):
         node_type = source_node.layer.name
         if hasattr(self, "rename_" + node_type):
-            print ("Try to convert Lambda function [{}]".format(source_node.layer.name))
+            print("Try to convert Lambda function [{}]".format(source_node.layer.name))
             func = getattr(self, "rename_" + node_type)
             func(source_node)
         else:
             raise NotImplementedError("Lambda layer [{}] in keras is not supported yet.".format(node_type))
-
 
     def rename_BatchNormalization(self, keras_node):
         IR_node = self.IR_graph.node.add()
@@ -712,23 +671,18 @@ class Keras2Parser(Parser):
             # var
             self.set_weight(keras_node.name, "var", keras_node.layer.get_weights()[idx + 1])
 
-
     def rename_ZeroPadding2D(self, keras_node):
         IR_node = self.IR_graph.node.add()
         self._convert_padding_api(keras_node, IR_node, "constant")
 
-
     def rename_SeparableConv2D(self, source_node):
         self._convert_convolution(source_node, 2)
-
 
     def rename_DepthwiseConv2D(self, source_node):
         self._convert_convolution(source_node, 2)
 
-
     def custom_relu6(x):
         return _keras.relu(x, max_value=6)
-
 
     def _convert_crop(self, source_node):
         IR_node = self.IR_graph.node.add()
@@ -742,28 +696,22 @@ class Keras2Parser(Parser):
             for j in i:
                 border.append(j)
 
-        assign_IRnode_values(IR_node, {'border' : border})
-
-
+        assign_IRnode_values(IR_node, {'border': border})
 
     def rename_Cropping1D(self, source_node):
         self._convert_crop(source_node)
 
-
     def rename_Cropping2D(self, source_node):
         self._convert_crop(source_node)
 
-
     def rename_Cropping3D(self, source_node):
         self._convert_crop(source_node)
-
 
     def rename_LeakyReLU(self, source_node):
         IR_node = self.IR_graph.node.add()
         Keras2Parser._copy_and_reop(source_node, IR_node, 'LeakyRelu')
         self.convert_inedge(source_node, IR_node)
-        assign_IRnode_values(IR_node, {'alpha' : source_node.layer.alpha.tolist()})
-
+        assign_IRnode_values(IR_node, {'alpha': source_node.layer.alpha.tolist()})
 
     def rename_ReLU(self, source_node):
         IR_node = self.IR_graph.node.add()
@@ -773,9 +721,8 @@ class Keras2Parser(Parser):
         else:
             Keras2Parser._copy_and_reop(source_node, IR_node, 'Relu')
 
-        assign_IRnode_values(IR_node, {'max_value' : max_value})
+        assign_IRnode_values(IR_node, {'max_value': max_value})
         self.convert_inedge(source_node, IR_node)
-
 
     def rename_space_to_depth_x2(self, source_node):
         IR_node = self.IR_graph.node.add()
