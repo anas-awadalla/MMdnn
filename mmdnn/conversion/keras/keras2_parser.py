@@ -110,11 +110,13 @@ class Keras2Parser(Parser):
             # except:
             # Keras. 2.2.2
             import tensorflow.keras.layers as layers
+            from tensorflow.keras.initializers import VarianceScaling
             model = _keras.models.load_model(
                 model,
                 custom_objects={
                     'relu6': layers.ReLU(6, name='relu6'),
-                    'DepthwiseConv2D': layers.DepthwiseConv2D
+                    'DepthwiseConv2D': layers.DepthwiseConv2D,
+                    'AudioVarianceScaling': VarianceScaling
                 }
             )
             self.weight_loaded = True
