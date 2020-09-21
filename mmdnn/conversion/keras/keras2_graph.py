@@ -40,12 +40,13 @@ class Keras2Graph(Graph):
         for i, layer in enumerate(self.model.layers):
             self.layer_map[layer.name] = Keras2GraphNode(layer)
             self.layer_name_map[layer.name] = layer.name
+            print(layer)
             for node in layer._inbound_nodes:
                 # for pred in node.inbound_layers:
-                if node not in self.layer_map:
-                    self.layer_map[node] = Keras2GraphNode(node)
-                    self.layer_name_map[node] = node
-                self._make_connection(node, layer)
+                if node.name not in self.layer_map:
+                    self.layer_map[node.name] = Keras2GraphNode(node)
+                    self.layer_name_map[node.name] = node.name
+                self._make_connection(node.name, layer.name)
 
         # Kit: TODO
         # Duplicate models for weight sharing
