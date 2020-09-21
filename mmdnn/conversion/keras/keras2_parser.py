@@ -109,7 +109,7 @@ class Keras2Parser(Parser):
             #     )
             # except:
             # Keras. 2.2.2
-            import keras.layers as layers
+            import tensorflow.keras.layers as layers
             model = _keras.models.load_model(
                 model,
                 custom_objects={
