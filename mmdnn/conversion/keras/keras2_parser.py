@@ -5,8 +5,8 @@
 
 import os
 from six import string_types as _string_types
-import keras as _keras
-from keras import backend as _K
+import tensorflow.keras as _keras
+from tensorflow.keras import backend as _K
 
 from mmdnn.conversion.keras.keras2_graph import Keras2Graph
 import mmdnn.conversion.common.IR.graph_pb2 as graph_pb2
